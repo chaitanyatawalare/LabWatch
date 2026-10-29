@@ -1,0 +1,30 @@
+# Python & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# SQLite Databases & Logs
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+labwatch.db
+test_labwatch.db
+
+# Agent Local Configuration / Generated Tokens
+src/agent_config.json
+
+# Environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE & OS Files
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+.DS_Store

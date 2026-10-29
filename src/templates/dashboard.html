@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>LabWatch — Multi-Device Computer Lab Monitoring System</title>
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --border-subtle: #e2e8f0;
+            --border-focus: #3b82f6;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --primary-blue: #2563eb;
+            --primary-blue-hover: #1d4ed8;
+            --primary-blue-soft: #eff6ff;
+            --status-green: #10b981;
+            --status-green-soft: #ecfdf5;
+            --status-amber: #f59e0b;
+            --status-amber-soft: #fffbeb;
+            --status-rose: #ef4444;
+            --status-rose-soft: #fef2f2;
+            --status-purple: #8b5cf6;
+            --status-purple-soft: #f5f3ff;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        /* Sticky Header */
+        header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0.65rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            flex-shrink: 0;
+        }
+
+        .brand-text h1 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin: 0;
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: var(--status-green-soft);
+            color: #047857;
+            border: 1px solid #a7f3d0;
+            padding: 0.15rem 0.45rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--status-green);
+            border-radius: 50%;
+            animation: pulse-ring 1.8s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.9); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.8; }
+        }
+
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.65rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.78rem;
+            font-weight: 600;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-card);
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            white-space: nowrap;
+            min-height: 32px;
+        }
+
+        .btn:hover {
+            background: var(--bg-body);
+            border-color: #cbd5e1;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: #ffffff;
+            border-color: var(--primary-blue);
+        }
+        .btn-primary:hover {
+            background: var(--primary-blue-hover);
+            color: #ffffff;
+        }
+
+        .btn-amber {
+            background: var(--status-amber-soft);
+            color: #b45309;
+            border-color: #fde68a;
+        }
+
+        /* Notification Alert Button with Red Dot / Count Badge */
+        .btn-notify {
+            position: relative;
+            background: var(--bg-card);
+            border-color: var(--border-subtle);
+            color: var(--text-main);
+        }
+
+        .btn-notify:hover {
+            background: #f1f5f9;
+        }
+
+        .notify-badge {
+            background-color: var(--status-rose);
+            color: #ffffff;
+            font-size: 0.62rem;
+            font-weight: 700;
+            min-width: 16px;
+            height: 16px;
+            line-height: 16px;
+            border-radius: 9999px;
+            padding: 0 4px;
+            text-align: center;
+            box-shadow: 0 0 0 2px var(--bg-card);
+            animation: pulse-badge 1.5s infinite;
+        }
+
+        @keyframes pulse-badge {
+            0% { transform: scale(0.95); opacity: 0.9; }
+            50% { transform: scale(1.15); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.9; }
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        /* 4 Top Metric Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .metric-card.blue::before { background: var(--primary-blue); }
+        .metric-card.green::before { background: var(--status-green); }
+        .metric-card.rose::before { background: var(--status-rose); }
+        .metric-card.amber::before { background: var(--status-amber); }
+
+        .metric-card-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .metric-card-val {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.1;
+        }
+
+        .metric-card-sub {
+            font-size: 0.72rem;
+            color: var(--text-light);
+        }
+
+        /* Responsive Dashboard Grid */
+        .dashboard-body-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.15rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .content-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.65rem;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 0.85rem;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .card-heading {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        /* Search input */
+        .search-box {
+            width: 100%;
+            background: var(--bg-body);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 0.6rem 0.85rem;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            outline: none;
+            margin-bottom: 0.85rem;
+            transition: border-color 0.15s;
+        }
+
+        .search-box:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Desktop Table View */
+        .desktop-table-wrap {
+            overflow-x: auto;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            text-align: left;
+        }
+
+        thead th {
+            background: #f1f5f9;
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 0.65rem 0.75rem;
+            border-bottom: 1px solid var(--border-subtle);
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-subtle);
+            vertical-align: middle;
+            color: var(--text-main);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr {
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        tbody tr.selected-row {
+            background-color: var(--primary-blue-soft) !important;
+        }
+
+        tbody tr.selected-row td:first-child {
+            border-left: 3px solid var(--primary-blue);
+        }
+
+        /* Mobile Card View for Devices (Hidden on Desktop, shown on Mobile) */
+        .mobile-device-list {
+            display: none;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+
+        .mobile-device-card {
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .mobile-device-card.selected-device {
+            border-color: var(--primary-blue);
+            background: var(--primary-blue-soft);
+            box-shadow: 0 0 0 1px var(--primary-blue);
+        }
+
+        .mobile-device-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-device-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .mobile-device-subtitle {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .mobile-meter-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            background: var(--bg-body);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 0.5rem;
+        }
+
+        .mobile-meter-item {
+            font-size: 0.75rem;
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-online {
+            background: var(--status-green-soft);
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+
+        .badge-offline {
+            background: var(--status-rose-soft);
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        /* Progress bars */
+        .progress-track {
+            width: 75px;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 9999px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 0.35rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.3s ease;
+        }
+
+        /* Live Telemetry Focus Card */
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.65rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .telemetry-stat {
+            background: var(--bg-body);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+        }
+
+        .telemetry-stat-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.2rem;
+        }
+
+        .telemetry-stat-num {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .telemetry-stat-extra {
+            font-size: 0.7rem;
+            color: var(--text-light);
+        }
+
+        .chart-box {
+            width: 100%;
+            height: 160px;
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 0.4rem;
+        }
+
+        /* Alerts List */
+        .alert-card {
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            border-left: 4px solid var(--status-amber);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+            margin-bottom: 0.65rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .alert-card.critical {
+            border-left-color: var(--status-rose);
+        }
+
+        .alert-card.demo-mode {
+            border-left-color: var(--status-purple);
+            background: var(--status-purple-soft);
+        }
+
+        .alert-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.72rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .alert-card-msg {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.3rem;
+        }
+
+        .alert-diagnostic-note {
+            background: #f8fafc;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 0.45rem 0.6rem;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+            line-height: 1.35;
+        }
+
+        .tag-demo {
+            background: var(--status-purple);
+            color: #ffffff;
+            font-size: 0.62rem;
+            font-weight: 700;
+            padding: 0.1rem 0.35rem;
+            border-radius: 4px;
+        }
+
+        /* Mobile URL Connection Box */
+        .mobile-url-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+            text-align: center;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 0.65rem;
+            word-break: break-all;
+        }
+
+        /* Modal Overlays */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-dialog {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+            width: 100%;
+            max-width: 480px;
+            padding: 1.25rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ========================================= */
+        /* TRUE MOBILE RESPONSIVENESS (PHONES / TABS)*/
+        /* ========================================= */
+        @media (max-width: 860px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.65rem;
+            }
+            .dashboard-body-grid {
+                grid-template-columns: 1fr;
+            }
+            .telemetry-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            /* Hide wide desktop table and show touch-optimized mobile cards */
+            .desktop-table-wrap {
+                display: none;
+            }
+            .mobile-device-list {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .btn-text-hide {
+                display: none;
+            }
+            .nav-buttons .btn {
+                padding: 0.25rem 0.35rem;
+            }
+        }
+                padding: 0.5rem 0.65rem;
+            }
+            .header-inner {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                gap: 0.35rem;
+            }
+            .brand-section {
+                gap: 0.35rem;
+            }
+            .brand-logo {
+                width: 26px;
+                height: 26px;
+            }
+            .brand-text h1 {
+                font-size: 0.88rem;
+                gap: 0.25rem;
+            }
+            .live-indicator {
+                font-size: 0.58rem;
+                padding: 0.1rem 0.35rem;
+            }
+            .nav-buttons {
+                gap: 0.25rem;
+            }
+            .nav-buttons .btn {
+                padding: 0.25rem 0.45rem;
+                font-size: 0.7rem;
+                min-height: 28px;
+                gap: 0.2rem;
+            }
+            .main-container {
+                padding: 0.65rem;
+            }
+            .content-card {
+                padding: 0.85rem;
+                border-radius: 10px;
+            }
+            .telemetry-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.45rem;
+            }
+            .telemetry-stat {
+                padding: 0.6rem;
+            }
+            .telemetry-stat-num {
+                font-size: 1.15rem;
+            }
+            .chart-box {
+                height: 140px;
+            }
+        }
+
+        footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-subtle);
+            padding: 0.85rem;
+            text-align: center;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="header-inner">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>LabWatch <span class="live-indicator"><span class="pulse-dot"></span> LIVE</span></h1>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <!-- Navigation Link to Process Monitor -->
+                <a href="/processes" class="btn" title="View Process & Application Monitor">
+                    ⚡ <span class="btn-text-hide">Process </span>Monitor
+                </a>
+
+                <!-- Notification Bell Button with Dynamic Red Indicator -->
+                <button class="btn btn-notify" id="notify-btn" onclick="scrollToAlerts()" title="View Alerts">
+                    🔔
+                    <span class="btn-text-hide">Alerts</span>
+                    <span class="notify-badge" id="notify-red-badge" style="display: none;">0</span>
+                </button>
+
+                <button class="btn btn-amber" onclick="openTestModal()">
+                    ⚡ <span class="btn-text-hide">Demo </span>Alert
+                </button>
+                <button class="btn" onclick="openThresholdModal()">
+                    ⚙️ <span class="btn-text-hide">Threshold </span>Rules
+                </button>
+                <button class="btn btn-primary" onclick="window.location.reload()">
+                    🔄 <span class="btn-text-hide">Live </span>Sync
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="main-container">
+
+        <!-- Top 4 Summary Cards -->
+        <section class="summary-grid">
+            <div class="metric-card blue">
+                <span class="metric-card-label">Total Devices</span>
+                <span class="metric-card-val" id="stat-total-devices">0</span>
+                <span class="metric-card-sub">Supporting 50+ nodes</span>
+            </div>
+            <div class="metric-card green">
+                <span class="metric-card-label">Online Active</span>
+                <span class="metric-card-val" id="stat-online-devices">0</span>
+                <span class="metric-card-sub">Active heartbeats</span>
+            </div>
+            <div class="metric-card rose">
+                <span class="metric-card-label">Offline</span>
+                <span class="metric-card-val" id="stat-offline-devices">0</span>
+                <span class="metric-card-sub">No heartbeat</span>
+            </div>
+            <div class="metric-card amber">
+                <span class="metric-card-label">Alerts</span>
+                <span class="metric-card-val" id="stat-active-alerts">0</span>
+                <span class="metric-card-sub">Warnings / Critical</span>
+            </div>
+        </section>
+
+        <!-- Two Column Content Layout -->
+        <div class="dashboard-body-grid">
+
+            <!-- Left Main Column: Inventory & Telemetry Focus -->
+            <div>
+                <!-- Device Inventory -->
+                <div class="content-card">
+                    <div class="content-card-header">
+                        <span class="card-heading">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary-blue);"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                            Lab Computers
+                        </span>
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">Tap to focus</span>
+                    </div>
+
+                    <input type="text" id="device-search" class="search-box" placeholder="Search by name, IP, or ID..." onkeyup="filterDeviceTable()">
+
+                    <!-- 1. Desktop Table (Screens > 860px) -->
+                    <div class="desktop-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Hostname</th>
+                                    <th>IP Address</th>
+                                    <th>OS</th>
+                                    <th>CPU</th>
+                                    <th>RAM</th>
+                                    <th>Last Seen</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="devices-tbody">
+                                <tr>
+                                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Loading computers...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 2. Mobile Touch Cards (Screens <= 860px) -->
+                    <div class="mobile-device-list" id="mobile-devices-container">
+                        <p style="text-align: center; color: var(--text-muted); padding: 1rem; font-size: 0.8rem;">Loading computers...</p>
+                    </div>
+                </div>
+
+                <!-- Focused Telemetry View -->
+                <div class="content-card">
+                    <div class="content-card-header">
+                        <span class="card-heading" id="selected-device-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary-blue);"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                            Focus: Select a Device
+                        </span>
+                        <span id="selected-device-badge" class="badge badge-online">ACTIVE</span>
+                    </div>
+
+                    <!-- 4 Metric Stats -->
+                    <div class="telemetry-grid">
+                        <div class="telemetry-stat">
+                            <div class="telemetry-stat-label">CPU Usage</div>
+                            <div class="telemetry-stat-num" id="metric-cpu">-- %</div>
+                        </div>
+                        <div class="telemetry-stat">
+                            <div class="telemetry-stat-label">RAM Load</div>
+                            <div class="telemetry-stat-num" id="metric-ram">-- %</div>
+                            <div class="telemetry-stat-extra" id="metric-ram-sub">-- / -- GB</div>
+                        </div>
+                        <div class="telemetry-stat">
+                            <div class="telemetry-stat-label">Disk Storage</div>
+                            <div class="telemetry-stat-num" id="metric-disk">-- %</div>
+                            <div class="telemetry-stat-extra" id="metric-disk-sub">-- Free</div>
+                        </div>
+                        <div class="telemetry-stat">
+                            <div class="telemetry-stat-label">Uptime</div>
+                            <div class="telemetry-stat-num" id="metric-uptime">-- hrs</div>
+                        </div>
+                    </div>
+
+                    <!-- Live Trend Chart -->
+                    <div>
+                        <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.4rem;">
+                            Live Real-Time CPU & RAM Utilization Trend
+                        </div>
+                        <div class="chart-box">
+                            <svg id="history-svg" width="100%" height="100%"></svg>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 0.75rem; font-size: 0.72rem; color: var(--text-muted); background: var(--bg-body); padding: 0.5rem 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);" id="sensor-note-box">
+                        <b>Truthful Telemetry:</b> <span id="sensor-note-text">Accurate hardware metrics verified</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Alerts & Mobile Connection -->
+            <div>
+                <!-- Active Alerts -->
+                <div class="content-card">
+                    <div class="content-card-header">
+                        <span class="card-heading">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--status-amber);"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            Active Alerts
+                        </span>
+                        <div style="display: flex; align-items: center; gap: 0.4rem;">
+                            <span style="font-size: 0.72rem; color: var(--text-muted);" id="alert-count-pill">0 Active</span>
+                            <button class="btn" style="padding: 0.15rem 0.45rem; font-size: 0.7rem; min-height: 24px;" onclick="clearAllAlerts()">Clear All</button>
+                        </div>
+                    </div>
+                    <div id="alerts-container">
+                        <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 1.5rem;">No active alerts. All systems healthy.</p>
+                    </div>
+                </div>
+
+                <!-- Android Phone Access Guide -->
+                <div class="content-card">
+                    <div class="content-card-header">
+                        <span class="card-heading">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary-blue);"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                            Mobile Supervisor View
+                        </span>
+                    </div>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.65rem;">
+                        Open this dashboard on your Android phone browser:
+                    </p>
+                    <div class="mobile-url-box" id="mobile-url-display">
+                        http://[YOUR-IP]:8000
+                    </div>
+                    <ul style="font-size: 0.74rem; color: var(--text-muted); line-height: 1.5; padding-left: 1.15rem;">
+                        <li>Touch-optimized mobile cards and controls.</li>
+                        <li>Live telemetry sync via Server-Sent Events (SSE).</li>
+                        <li>Remote alert triage from anywhere in the lab.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Demo Alert Modal -->
+    <div id="test-alert-modal" class="modal-overlay">
+        <div class="modal-dialog">
+            <div class="content-card-header" style="margin-bottom: 0.75rem;">
+                <span class="card-heading">⚡ Safe Demo Alert Injection</span>
+                <button class="btn" style="padding: 0.1rem 0.5rem; min-height: 28px;" onclick="closeModal('test-alert-modal')">✕</button>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Safe, non-destructive test alerts for viva evaluation. Visibly labeled <b>[DEMO MODE]</b> with zero hardware risk.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+                <button class="btn btn-amber" style="padding: 0.65rem;" onclick="sendTestAlert('simulated_overheating')">
+                    🔥 Trigger Simulated Thermal Alert (92.4°C)
+                </button>
+                <button class="btn btn-amber" style="padding: 0.65rem;" onclick="sendTestAlert('simulated_cpu_spike')">
+                    ⚡ Trigger Simulated CPU Spike (98.7%)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Threshold Modal -->
+    <div id="threshold-modal" class="modal-overlay">
+        <div class="modal-dialog">
+            <div class="content-card-header" style="margin-bottom: 0.75rem;">
+                <span class="card-heading">⚙️ Threshold Rules</span>
+                <button class="btn" style="padding: 0.1rem 0.5rem; min-height: 28px;" onclick="closeModal('threshold-modal')">✕</button>
+            </div>
+            <div id="threshold-form-container" style="display: flex; flex-direction: column; gap: 0.65rem;">
+                Loading threshold rules...
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        LabWatch: Multi-Device Computer Lab Monitoring System • Final-Year Engineering Project
+    </footer>
+
+    <script>
+        function getSeenAlertIds() {
+            try {
+                const stored = localStorage.getItem('labwatch_seen_alerts');
+                return stored ? new Set(JSON.parse(stored)) : new Set();
+            } catch (e) {
+                return new Set();
+            }
+        }
+
+        function saveSeenAlertIds(idsSet) {
+            try {
+                localStorage.setItem('labwatch_seen_alerts', JSON.stringify(Array.from(idsSet)));
+            } catch (e) {}
+        }
+
+        let currentSelectedDeviceId = null;
+        let cachedDevices = [];
+        let seenAlertIds = getSeenAlertIds();
+
+        function init() {
+            const loc = window.location;
+            document.getElementById('mobile-url-display').innerText = `${loc.protocol}//${loc.hostname}:${loc.port || '8000'}`;
+
+            fetchDevices();
+            fetchAlerts();
+
+            // Zero-latency Server-Sent Events
+            if (window.EventSource) {
+                const sse = new EventSource('/api/events');
+                sse.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleLiveUpdate(data);
+                    } catch (e) {
+                        console.error("SSE parse error", e);
+                    }
+                };
+                sse.onerror = function() {
+                    setTimeout(fetchDevices, 2500);
+                };
+            } else {
+                setInterval(fetchDevices, 1500);
+                setInterval(fetchAlerts, 3000);
+            }
+        }
+
+        async function fetchDevices() {
+            try {
+                const res = await fetch('/api/devices');
+                const devices = await res.json();
+                cachedDevices = devices;
+                renderDevices(devices);
+                updateSummaryStats(devices);
+
+                if (!currentSelectedDeviceId && devices.length > 0) {
+                    selectDevice(devices[0].device_id);
+                } else if (currentSelectedDeviceId) {
+                    fetchTelemetryHistory(currentSelectedDeviceId);
+                }
+            } catch (err) {
+                console.error("Error fetching devices", err);
+            }
+        }
+
+        async function fetchAlerts() {
+            try {
+                const res = await fetch('/api/alerts?active_only=1');
+                const alerts = await res.json();
+                renderAlerts(alerts);
+            } catch (err) {
+                console.error("Error fetching alerts", err);
+            }
+        }
+
+        function updateSummaryStats(devices) {
+            document.getElementById('stat-total-devices').innerText = devices.length;
+            const online = devices.filter(d => d.status === 'online').length;
+            document.getElementById('stat-online-devices').innerText = online;
+            document.getElementById('stat-offline-devices').innerText = devices.length - online;
+        }
+
+        function renderDevices(devices) {
+            const tbody = document.getElementById('devices-tbody');
+            const mobileContainer = document.getElementById('mobile-devices-container');
+
+            if (!devices || devices.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No devices registered yet.</td></tr>`;
+                mobileContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No devices registered yet.</p>`;
+                return;
+            }
+
+            const query = (document.getElementById('device-search').value || '').toLowerCase();
+            const filtered = devices.filter(d => 
+                (d.hostname || '').toLowerCase().includes(query) ||
+                (d.ip_address || '').toLowerCase().includes(query) ||
+                (d.device_id || '').toLowerCase().includes(query) ||
+                (d.os_type || '').toLowerCase().includes(query)
+            );
+
+            // 1. Render Desktop Table Rows
+            tbody.innerHTML = filtered.map(d => {
+                const isOnline = d.status === 'online';
+                const isSelected = d.device_id === currentSelectedDeviceId;
+                const cpuVal = (d.latest_telemetry && d.latest_telemetry.cpu_pct !== undefined) ? d.latest_telemetry.cpu_pct : '--';
+                const ramVal = (d.latest_telemetry && d.latest_telemetry.ram_pct !== undefined) ? d.latest_telemetry.ram_pct : '--';
+                
+                const cpuColor = cpuVal > 85 ? 'var(--status-rose)' : (cpuVal > 70 ? 'var(--status-amber)' : 'var(--status-green)');
+                const ramColor = ramVal > 85 ? 'var(--status-rose)' : (ramVal > 75 ? 'var(--status-amber)' : 'var(--primary-blue)');
+
+                return `
+                    <tr class="${isSelected ? 'selected-row' : ''}" onclick="selectDevice('${d.device_id}')">
+                        <td>
+                            <span class="badge ${isOnline ? 'badge-online' : 'badge-offline'}">
+                                ${isOnline ? '● ONLINE' : '○ OFFLINE'}
+                            </span>
+                        </td>
+                        <td><b>${escapeHtml(d.hostname)}</b><br><span style="font-size:0.7rem; color:var(--text-muted);">${d.device_id}</span></td>
+                        <td>${escapeHtml(d.ip_address || 'Unknown')}</td>
+                        <td>${escapeHtml(d.os_type || 'Unknown')}</td>
+                        <td>
+                            <div class="progress-track">
+                                <div class="progress-fill" style="width: ${typeof cpuVal === 'number' ? Math.min(cpuVal, 100) : 0}%; background: ${cpuColor};"></div>
+                            </div>
+                            ${cpuVal}%
+                        </td>
+                        <td>
+                            <div class="progress-track">
+                                <div class="progress-fill" style="width: ${typeof ramVal === 'number' ? Math.min(ramVal, 100) : 0}%; background: ${ramColor};"></div>
+                            </div>
+                            ${ramVal}%
+                        </td>
+                        <td style="font-size: 0.72rem; color: var(--text-muted);">${formatTime(d.last_seen_at)}</td>
+                        <td>
+                            <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 0.72rem; min-height: 26px;" onclick="event.stopPropagation(); removeDevice('${d.device_id}')">Remove</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // 2. Render Mobile Touch Cards
+            mobileContainer.innerHTML = filtered.map(d => {
+                const isOnline = d.status === 'online';
+                const isSelected = d.device_id === currentSelectedDeviceId;
+                const cpuVal = (d.latest_telemetry && d.latest_telemetry.cpu_pct !== undefined) ? d.latest_telemetry.cpu_pct : '--';
+                const ramVal = (d.latest_telemetry && d.latest_telemetry.ram_pct !== undefined) ? d.latest_telemetry.ram_pct : '--';
+                
+                return `
+                    <div class="mobile-device-card ${isSelected ? 'selected-device' : ''}" onclick="selectDevice('${d.device_id}')">
+                        <div class="mobile-device-card-header">
+                            <div>
+                                <div class="mobile-device-title">${escapeHtml(d.hostname)}</div>
+                                <div class="mobile-device-subtitle">${escapeHtml(d.ip_address || 'No IP')} • ${d.device_id}</div>
+                            </div>
+                            <span class="badge ${isOnline ? 'badge-online' : 'badge-offline'}">
+                                ${isOnline ? 'ONLINE' : 'OFFLINE'}
+                            </span>
+                        </div>
+
+                        <!-- System OS & Last Seen Details -->
+                        <div style="font-size: 0.72rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.2rem; background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 0.45rem 0.6rem;">
+                            <div><b>OS:</b> ${escapeHtml(d.os_type || 'Unknown')}</div>
+                            <div><b>Last Seen:</b> ${formatTime(d.last_seen_at)}</div>
+                        </div>
+
+                        <!-- Real-time Meter Row -->
+                        <div class="mobile-meter-row">
+                            <div class="mobile-meter-item">
+                                <span style="color:var(--text-muted);">CPU:</span> <b>${cpuVal}%</b>
+                            </div>
+                            <div class="mobile-meter-item">
+                                <span style="color:var(--text-muted);">RAM:</span> <b>${ramVal}%</b>
+                            </div>
+                        </div>
+
+                        <!-- Remove Action Button -->
+                        <div style="display: flex; justify-content: flex-end; margin-top: 0.2rem;">
+                            <button class="btn" style="padding: 0.25rem 0.65rem; font-size: 0.72rem; min-height: 28px; border-color: #fecaca; color: #b91c1c; background: #fef2f2;" onclick="event.stopPropagation(); removeDevice('${d.device_id}')">
+                                🗑️ Remove Device
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function selectDevice(deviceId) {
+            currentSelectedDeviceId = deviceId;
+            const dev = cachedDevices.find(d => d.device_id === deviceId);
+            if (dev) {
+                document.getElementById('selected-device-title').innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary-blue);"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    Focus: ${escapeHtml(dev.hostname)}
+                `;
+                const badge = document.getElementById('selected-device-badge');
+                badge.className = `badge ${dev.status === 'online' ? 'badge-online' : 'badge-offline'}`;
+                badge.innerText = dev.status.toUpperCase();
+            }
+            renderDevices(cachedDevices);
+            await fetchTelemetryHistory(deviceId);
+        }
+
+        async function fetchTelemetryHistory(deviceId) {
+            try {
+                const res = await fetch(`/api/telemetry?device_id=${encodeURIComponent(deviceId)}&limit=60`);
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    const latest = data[data.length - 1];
+                    document.getElementById('metric-cpu').innerText = `${latest.cpu_pct}%`;
+                    document.getElementById('metric-ram').innerText = `${latest.ram_pct}%`;
+                    document.getElementById('metric-ram-sub').innerText = `${latest.ram_used_gb} / ${latest.ram_total_gb} GB`;
+                    document.getElementById('metric-disk').innerText = `${latest.disk_pct}%`;
+                    document.getElementById('metric-disk-sub').innerText = `${latest.disk_free_gb} GB Free`;
+                    document.getElementById('metric-uptime').innerText = `${latest.uptime_hours} hrs`;
+                    document.getElementById('sensor-note-text').innerText = latest.sensor_notes || 'Accurate hardware metrics verified';
+
+                    renderSvgChart(data);
+                }
+            } catch (err) {
+                console.error("Error fetching history", err);
+            }
+        }
+
+        function renderSvgChart(history) {
+            const svg = document.getElementById('history-svg');
+            const width = svg.clientWidth || 340;
+            const height = svg.clientHeight || 140;
+            const padding = 12;
+
+            if (history.length < 2) {
+                svg.innerHTML = `<text x="50%" y="50%" fill="#94a3b8" font-size="11" text-anchor="middle">Awaiting live telemetry stream...</text>`;
+                return;
+            }
+
+            const stepX = (width - padding * 2) / (history.length - 1);
+            let cpuPoints = [];
+            let ramPoints = [];
+
+            history.forEach((pt, i) => {
+                const x = padding + (i * stepX);
+                const yCpu = height - padding - ((pt.cpu_pct / 100) * (height - padding * 2));
+                const yRam = height - padding - ((pt.ram_pct / 100) * (height - padding * 2));
+                cpuPoints.push(`${x},${yCpu}`);
+                ramPoints.push(`${x},${yRam}`);
+            });
+
+            svg.innerHTML = `
+                <!-- Grid Lines -->
+                <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#e2e8f0" stroke-width="1" />
+                <line x1="${padding}" y1="${height/2}" x2="${width - padding}" y2="${height/2}" stroke="#f1f5f9" stroke-dasharray="4" stroke-width="1" />
+                <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="#e2e8f0" stroke-width="1" />
+
+                <!-- RAM Line (Blue) -->
+                <polyline fill="none" stroke="#2563eb" stroke-width="2.5" points="${ramPoints.join(' ')}" />
+
+                <!-- CPU Line (Green) -->
+                <polyline fill="none" stroke="#10b981" stroke-width="2.5" points="${cpuPoints.join(' ')}" />
+
+                <!-- Legend -->
+                <rect x="${width - 140}" y="4" width="8" height="8" rx="2" fill="#10b981" />
+                <text x="${width - 128}" y="12" fill="#64748b" font-size="9" font-weight="600">CPU</text>
+                <rect x="${width - 65}" y="4" width="8" height="8" rx="2" fill="#2563eb" />
+                <text x="${width - 53}" y="12" fill="#64748b" font-size="9" font-weight="600">RAM</text>
+            `;
+        }
+
+        let currentAlertsList = [];
+
+        function renderAlerts(alerts) {
+            currentAlertsList = alerts || [];
+            const container = document.getElementById('alerts-container');
+            const alertCount = currentAlertsList.length;
+            document.getElementById('stat-active-alerts').innerText = alertCount;
+            document.getElementById('alert-count-pill').innerText = `${alertCount} Active`;
+
+            // Calculate unread alerts by checking against persistent seen alert IDs
+            const unreadCount = currentAlertsList.filter(a => !seenAlertIds.has(a.id)).length;
+
+            const redBadge = document.getElementById('notify-red-badge');
+            if (unreadCount > 0) {
+                redBadge.style.display = 'inline-block';
+                redBadge.innerText = unreadCount;
+            } else {
+                redBadge.style.display = 'none';
+            }
+
+            if (!alerts || alerts.length === 0) {
+                container.innerHTML = `<p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 1.5rem;">No active alerts. All systems healthy.</p>`;
+                return;
+            }
+
+            container.innerHTML = alerts.map(a => {
+                const isCrit = a.severity === 'critical';
+                const isSim = a.is_simulated === 1;
+                return `
+                    <div class="alert-card ${isCrit ? 'critical' : ''} ${isSim ? 'demo-mode' : ''}">
+                        <div class="alert-card-top">
+                            <span><b>${escapeHtml(a.hostname || a.device_id)}</b> ${isSim ? '<span class="tag-demo">DEMO MODE</span>' : ''}</span>
+                            <span style="color: var(--text-muted);">${formatTime(a.created_at)}</span>
+                        </div>
+                        <div class="alert-card-msg">${escapeHtml(a.message)}</div>
+                        ${a.troubleshooting ? `<div class="alert-diagnostic-note"><b>💡 Recommended Diagnostic:</b><br>${escapeHtml(a.troubleshooting)}</div>` : ''}
+                        <div style="margin-top: 0.45rem;">
+                            <button class="btn" style="padding: 0.2rem 0.6rem; font-size: 0.72rem; min-height: 28px;" onclick="resolveAlert(${a.id})">✓ Acknowledge & Resolve</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function clearAllAlerts() {
+            try {
+                await fetch('/api/alerts/clear-all', { method: 'POST' });
+                seenAlertIds.clear();
+                saveSeenAlertIds(seenAlertIds);
+                const redBadge = document.getElementById('notify-red-badge');
+                if (redBadge) {
+                    redBadge.style.display = 'none';
+                    redBadge.innerText = '0';
+                }
+                fetchAlerts();
+            } catch (e) {
+                console.error("Clear all error", e);
+            }
+        }
+
+        async function resolveAlert(alertId) {
+            try {
+                await fetch(`/api/alerts/${alertId}/resolve`, { method: 'POST' });
+                fetchAlerts();
+            } catch (e) {
+                console.error("Resolve error", e);
+            }
+        }
+
+        async function removeDevice(deviceId) {
+            if (!confirm(`Are you sure you want to remove device ${deviceId}?`)) return;
+            try {
+                await fetch(`/api/devices/${encodeURIComponent(deviceId)}`, { method: 'DELETE' });
+                if (currentSelectedDeviceId === deviceId) currentSelectedDeviceId = null;
+                fetchDevices();
+            } catch (e) {
+                console.error("Remove error", e);
+            }
+        }
+
+        function handleLiveUpdate(data) {
+            if (data.type === 'telemetry') {
+                // Immediate in-place metric update without waiting for fetch roundtrip
+                if (data.device_id === currentSelectedDeviceId) {
+                    if (data.cpu_pct !== undefined) document.getElementById('metric-cpu').innerText = `${data.cpu_pct}%`;
+                    if (data.ram_pct !== undefined) document.getElementById('metric-ram').innerText = `${data.ram_pct}%`;
+                    if (data.ram_used_gb !== undefined && data.ram_total_gb !== undefined) {
+                        document.getElementById('metric-ram-sub').innerText = `${data.ram_used_gb} / ${data.ram_total_gb} GB`;
+                    }
+                    if (data.disk_pct !== undefined) document.getElementById('metric-disk').innerText = `${data.disk_pct}%`;
+                    if (data.disk_free_gb !== undefined) document.getElementById('metric-disk-sub').innerText = `${data.disk_free_gb} GB Free`;
+                    if (data.uptime_hours !== undefined) document.getElementById('metric-uptime').innerText = `${data.uptime_hours} hrs`;
+                    fetchTelemetryHistory(currentSelectedDeviceId);
+                }
+                // Quick update of devices cache
+                const targetDev = cachedDevices.find(d => d.device_id === data.device_id);
+                if (targetDev) {
+                    targetDev.status = 'online';
+                    targetDev.last_seen_at = new Date().toISOString();
+                    targetDev.latest_telemetry = targetDev.latest_telemetry || {};
+                    targetDev.latest_telemetry.cpu_pct = data.cpu_pct;
+                    targetDev.latest_telemetry.ram_pct = data.ram_pct;
+                    renderDevices(cachedDevices);
+                    updateSummaryStats(cachedDevices);
+                } else {
+                    fetchDevices();
+                }
+            } else if (data.type === 'alert') {
+                fetchAlerts();
+            } else if (data.type === 'device_status_change' || data.type === 'device_registered' || data.type === 'device_removed') {
+                fetchDevices();
+            }
+        }
+
+        function scrollToAlerts() {
+            // Mark all current alerts as seen immediately in memory and localStorage
+            if (currentAlertsList && currentAlertsList.length > 0) {
+                currentAlertsList.forEach(a => seenAlertIds.add(a.id));
+                saveSeenAlertIds(seenAlertIds);
+            }
+
+            // Immediately clear the red badge from UI
+            const redBadge = document.getElementById('notify-red-badge');
+            if (redBadge) {
+                redBadge.style.display = 'none';
+                redBadge.innerText = '0';
+            }
+
+            const alertsSection = document.getElementById('alerts-container');
+            if (alertsSection) {
+                alertsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Flash animation effect
+                alertsSection.style.transition = 'background-color 0.4s';
+                alertsSection.style.backgroundColor = 'rgba(254, 242, 242, 0.8)';
+                setTimeout(() => {
+                    alertsSection.style.backgroundColor = 'transparent';
+                }, 800);
+            }
+        }
+
+        function filterDeviceTable() {
+            renderDevices(cachedDevices);
+        }
+
+        function openTestModal() {
+            document.getElementById('test-alert-modal').style.display = 'flex';
+        }
+
+        function openThresholdModal() {
+            loadThresholdConfigs();
+            document.getElementById('threshold-modal').style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        async function sendTestAlert(testType) {
+            if (!currentSelectedDeviceId) {
+                alert("Please select a registered device first.");
+                return;
+            }
+            try {
+                await fetch('/api/alerts/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        device_id: currentSelectedDeviceId,
+                        test_type: testType
+                    })
+                });
+                closeModal('test-alert-modal');
+                fetchAlerts();
+            } catch (err) {
+                alert("Failed to inject demo alert: " + err);
+            }
+        }
+
+        async function loadThresholdConfigs() {
+            const form = document.getElementById('threshold-form-container');
+            try {
+                const res = await fetch('/api/config/thresholds');
+                const configs = await res.json();
+                let html = '';
+                for (let k in configs) {
+                    const c = configs[k];
+                    html += `
+                        <div style="background: var(--bg-body); border: 1px solid var(--border-subtle); padding: 0.6rem; border-radius: 6px;">
+                            <div style="font-weight: 600; font-size: 0.82rem; margin-bottom: 0.2rem;">${c.metric_name}</div>
+                            <div style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.35rem;">${c.description || ''}</div>
+                            <div style="display: flex; gap: 0.4rem; align-items: center; font-size: 0.78rem;">
+                                <label>Warn: <input id="warn-${c.metric_name}" type="number" value="${c.warning_threshold}" style="width: 52px; border:1px solid #cbd5e1; border-radius:4px; padding: 2px 4px;"></label>
+                                <label>Crit: <input id="crit-${c.metric_name}" type="number" value="${c.critical_threshold}" style="width: 52px; border:1px solid #cbd5e1; border-radius:4px; padding: 2px 4px;"></label>
+                                <button class="btn btn-primary" style="padding: 2px 8px; font-size: 0.7rem; min-height: 26px;" onclick="saveThreshold('${c.metric_name}')">Save</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                form.innerHTML = html;
+            } catch (e) {
+                form.innerHTML = "Error loading alert configs: " + e;
+            }
+        }
+
+        async function saveThreshold(metricName) {
+            const warn = parseFloat(document.getElementById(`warn-${metricName}`).value);
+            const crit = parseFloat(document.getElementById(`crit-${metricName}`).value);
+            try {
+                await fetch('/api/config/thresholds', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        metric_name: metricName,
+                        warning_threshold: warn,
+                        critical_threshold: crit,
+                        is_enabled: 1
+                    })
+                });
+                alert(`Threshold for ${metricName} updated.`);
+            } catch (err) {
+                alert("Error saving threshold: " + err);
+            }
+        }
+
+        function formatTime(isoStr) {
+            if (!isoStr) return 'Never';
+            try {
+                const d = new Date(isoStr);
+                return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } catch (e) {
+                return isoStr;
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

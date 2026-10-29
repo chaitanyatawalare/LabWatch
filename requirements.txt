@@ -1,0 +1,11 @@
+# LabWatch - Python Dependencies
+
+# Core System Monitoring (Optional if using built-in zero-dependency Win32/POSIX engine, but supported)
+psutil>=5.9.0
+
+# Optional Web / Dashboard frameworks if running in advanced environment
+# LabWatch includes a built-in zero-dependency HTTP REST & Real-time Web Dashboard (with Chart.js & SSE),
+# and also supports standard WSGI / Streamlit deployments.
+streamlit>=1.25.0
+plotly>=5.15.0
+requests>=2.28.0

@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>LabWatch — Real-Time Process & Application Monitor</title>
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --border-subtle: #e2e8f0;
+            --border-focus: #3b82f6;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --primary-blue: #2563eb;
+            --primary-blue-hover: #1d4ed8;
+            --primary-blue-soft: #eff6ff;
+            --status-green: #10b981;
+            --status-green-soft: #ecfdf5;
+            --status-amber: #f59e0b;
+            --status-amber-soft: #fffbeb;
+            --status-rose: #ef4444;
+            --status-rose-soft: #fef2f2;
+            --status-purple: #8b5cf6;
+            --status-purple-soft: #f5f3ff;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0.65rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            flex-shrink: 0;
+        }
+
+        .brand-text h1 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin: 0;
+        }
+
+        .page-badge {
+            background: var(--primary-blue-soft);
+            color: var(--primary-blue);
+            border: 1px solid #bfdbfe;
+            padding: 0.15rem 0.45rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.65rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.78rem;
+            font-weight: 600;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-card);
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            text-decoration: none;
+            white-space: nowrap;
+            min-height: 32px;
+        }
+
+        .btn:hover {
+            background: var(--bg-body);
+            border-color: #cbd5e1;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: #ffffff;
+            border-color: var(--primary-blue);
+        }
+        .btn-primary:hover {
+            background: var(--primary-blue-hover);
+            color: #ffffff;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        /* Controls Card and Device Identity */
+        .controls-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 0.85rem 1rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .controls-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .device-selector-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .device-badge-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 0.45rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            color: var(--text-main);
+            font-weight: 600;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .select-input {
+            background: var(--bg-body);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 0.45rem 0.65rem;
+            font-size: 0.82rem;
+            color: var(--text-main);
+            outline: none;
+            font-weight: 500;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+        .status-fresh {
+            background: var(--status-green-soft);
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+        .status-stale {
+            background: var(--status-amber-soft);
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+
+        /* 4 Stat Overview Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0; width: 4px;
+        }
+        .stat-card.blue::before { background: var(--primary-blue); }
+        .stat-card.green::before { background: var(--status-green); }
+        .stat-card.purple::before { background: var(--status-purple); }
+        .stat-card.amber::before { background: var(--status-amber); }
+
+        .stat-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .stat-val {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.1;
+        }
+        .stat-sub {
+            font-size: 0.72rem;
+            color: var(--text-light);
+        }
+
+        /* Content Sections */
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.15rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1rem;
+        }
+
+        .content-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.65rem;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 0.85rem;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .card-heading {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        /* Two Column Top 10 Layout */
+        .top-10-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .top-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .top-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-body);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 0.65rem;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            overflow: hidden;
+            gap: 0.5rem;
+        }
+        .top-item:hover {
+            border-color: var(--primary-blue);
+            background: var(--primary-blue-soft);
+        }
+
+        .top-item-title {
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            min-width: 0;
+            flex: 1;
+        }
+        .proc-name-truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+            max-width: 140px;
+        }
+        .pid-badge {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            background: #e2e8f0;
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+            flex-shrink: 0;
+        }
+
+        /* Search & Filter Bar */
+        .search-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.85rem;
+            flex-wrap: wrap;
+        }
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            background: var(--bg-body);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 0.75rem;
+            font-size: 0.82rem;
+            color: var(--text-main);
+            outline: none;
+        }
+        .search-input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Process Table */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            text-align: left;
+        }
+
+        thead th {
+            background: #f1f5f9;
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 0.65rem 0.75rem;
+            border-bottom: 1px solid var(--border-subtle);
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+        }
+        thead th:hover {
+            color: var(--primary-blue);
+        }
+
+        tbody td {
+            padding: 0.65rem 0.75rem;
+            border-bottom: 1px solid var(--border-subtle);
+            vertical-align: middle;
+            color: var(--text-main);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .meter-bar {
+            width: 70px;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 9999px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 0.35rem;
+        }
+        .meter-fill {
+            height: 100%;
+            border-radius: 9999px;
+        }
+
+        .chart-box {
+            width: 100%;
+            height: 150px;
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 0.4rem;
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 860px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .top-10-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 0.5rem 0.65rem;
+            }
+            .main-container {
+                padding: 0.65rem;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+            }
+            .stat-card {
+                padding: 0.75rem;
+            }
+            .stat-val {
+                font-size: 1.45rem;
+            }
+            .controls-card {
+                padding: 0.65rem;
+            }
+            .device-badge-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+                font-size: 0.75rem;
+            }
+            .desktop-only {
+                display: none;
+            }
+            .proc-name-truncate {
+                max-width: 110px;
+            }
+            .top-item {
+                padding: 0.45rem 0.55rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-subtle);
+            padding: 0.85rem;
+            text-align: center;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="header-inner">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>LabWatch <span class="page-badge">PROCESS MONITOR</span></h1>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="/" class="btn">
+                    📊 <span class="btn-text-hide">Dashboard</span>
+                </a>
+                <button class="btn btn-primary" onclick="fetchProcessSnapshot()">
+                    🔄 <span class="btn-text-hide">Refresh</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+
+        <!-- Controls Bar: Device Selector, Status, Auto-refresh interval, Export CSV -->
+        <div class="controls-card">
+            <!-- Top Row: Device Select & Action Buttons -->
+            <div class="controls-top-row">
+                <div style="display: flex; align-items: center; gap: 0.4rem; flex: 1; min-width: 220px;">
+                    <label for="device-select" style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); white-space: nowrap;">Computer:</label>
+                    <select id="device-select" class="select-input" onchange="onDeviceChange()">
+                        <option value="">Loading devices...</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
+                    <select id="refresh-interval" class="select-input" style="min-width: 80px; flex: none;" onchange="onIntervalChange()">
+                        <option value="1" selected>1s (Real-Time)</option>
+                        <option value="2">2s</option>
+                        <option value="3">3s</option>
+                        <option value="5">5s</option>
+                        <option value="10">10s</option>
+                    </select>
+                    <span id="stale-indicator" class="status-pill status-fresh">LIVE STREAMING</span>
+                    <button class="btn" style="padding: 0.35rem 0.6rem; font-size: 0.75rem;" onclick="exportCSV()">
+                        📥 Export CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dedicated Visible Device Identity Banner (Optimized for Mobile & Desktop) -->
+            <div class="device-badge-info" id="device-source-badge">
+                <div style="display: flex; align-items: center; gap: 0.3rem;">
+                    <span>🖥️ Hostname:</span> <b id="source-hostname" style="color: var(--text-main);">--</b>
+                </div>
+                <span class="desktop-only">•</span>
+                <div style="display: flex; align-items: center; gap: 0.3rem;">
+                    <span>🌐 IP Address:</span> <b id="source-ip" style="color: var(--primary-blue); font-family: monospace;">--</b>
+                </div>
+                <span class="desktop-only">•</span>
+                <div style="display: flex; align-items: center; gap: 0.3rem;">
+                    <span id="source-id" style="font-size: 0.72rem; color: var(--text-muted);">Device ID: --</span>
+                </div>
+                <div style="margin-left: auto; font-size: 0.72rem; color: var(--text-muted);" id="last-updated-text">
+                    Awaiting data...
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 Overview Metric Stats -->
+        <section class="stats-grid">
+            <div class="stat-card blue">
+                <span class="stat-label">Total Running Processes</span>
+                <span class="stat-val" id="stat-proc-count">0</span>
+                <span class="stat-sub">Active tasks & daemons</span>
+            </div>
+            <div class="stat-card green">
+                <span class="stat-label">Total System CPU Load</span>
+                <span class="stat-val" id="stat-proc-cpu">0.0%</span>
+                <span class="stat-sub">Current aggregate CPU</span>
+            </div>
+            <div class="stat-card purple">
+                <span class="stat-label">System RAM Utilization</span>
+                <span class="stat-val" id="stat-proc-ram">0.0%</span>
+                <span class="stat-sub" id="stat-proc-ram-sub">0.0 / 0.0 GB</span>
+            </div>
+            <div class="stat-card amber">
+                <span class="stat-label">Top CPU Consumer</span>
+                <span class="stat-val" id="stat-top-consumer" style="font-size: 1.15rem; font-weight: 700; word-break: break-all;">--</span>
+                <span class="stat-sub" id="stat-top-consumer-sub">0.0% CPU</span>
+            </div>
+        </section>
+
+        <!-- Top 10 CPU & Memory Consuming Processes Side-by-Side -->
+        <div class="top-10-grid">
+            <!-- Top 10 CPU -->
+            <div class="content-card">
+                <div class="content-card-header">
+                    <span class="card-heading">
+                        🔥 Top 10 CPU-Consuming Processes
+                    </span>
+                    <span style="font-size: 0.72rem; color: var(--text-muted);">% of processor time</span>
+                </div>
+                <div class="top-list" id="top-cpu-list">
+                    <p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; padding: 1rem;">Loading top CPU processes...</p>
+                </div>
+            </div>
+
+            <!-- Top 10 Memory -->
+            <div class="content-card">
+                <div class="content-card-header">
+                    <span class="card-heading">
+                        🧠 Top 10 Memory-Consuming Processes
+                    </span>
+                    <span style="font-size: 0.72rem; color: var(--text-muted);">Working set (MB)</span>
+                </div>
+                <div class="top-list" id="top-mem-list">
+                    <p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; padding: 1rem;">Loading top RAM processes...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historical Usage Trends Chart for Selected Process -->
+        <div class="content-card">
+            <div class="content-card-header">
+                <span class="card-heading" id="trend-chart-title">
+                    📈 Selected Process Trend: Total Workload
+                </span>
+                <div style="display: flex; gap: 0.4rem; align-items: center;">
+                    <span style="font-size: 0.72rem; color: var(--text-muted);">Click any process row to isolate trend</span>
+                    <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 0.7rem; min-height: 24px;" onclick="resetProcessFilter()">Reset</button>
+                </div>
+            </div>
+            <div class="chart-box">
+                <svg id="proc-history-svg" width="100%" height="100%"></svg>
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.4rem;">
+                <b>Note on Multi-Core Systems:</b> On multi-threaded Windows systems, individual multi-threaded process CPU percentages can exceed 100% (e.g. 200% = 2 full processor cores saturated). Working set (MB) represents real physical RAM resident memory.
+            </div>
+        </div>
+
+        <!-- Full Searchable & Sortable Process Inventory Table -->
+        <div class="content-card">
+            <div class="content-card-header">
+                <span class="card-heading">
+                    📋 Active Process Inventory
+                </span>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <span style="font-size: 0.72rem; color: var(--text-muted); background: var(--bg-body); border: 1px solid var(--border-subtle); padding: 0.2rem 0.5rem; border-radius: 4px;" id="table-source-info">Source: --</span>
+                    <span style="font-size: 0.72rem; color: var(--text-muted);" id="process-table-count">0 processes</span>
+                </div>
+            </div>
+
+            <div class="search-bar">
+                <input type="text" id="proc-search" class="search-input" placeholder="Search by process name, PID, or status..." onkeyup="filterProcessTable()">
+            </div>
+
+            <div class="table-wrap">
+                <table id="proc-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('name')">Process Name ↕</th>
+                            <th onclick="sortTable('pid')">PID ↕</th>
+                            <th onclick="sortTable('cpu_pct')">CPU Usage ↕</th>
+                            <th onclick="sortTable('mem_mb')">Memory (MB) ↕</th>
+                            <th onclick="sortTable('mem_pct')">Memory % ↕</th>
+                            <th onclick="sortTable('status')">Status ↕</th>
+                            <th onclick="sortTable('start_time')">Start Time ↕</th>
+                        </tr>
+                    </thead>
+                    <tbody id="proc-tbody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Awaiting process telemetry stream...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        LabWatch: Real-Time Multi-Device Computer Lab Monitoring System • Process & Application Monitoring Suite
+    </footer>
+
+    <script>
+        let currentDeviceId = null;
+        let cachedDevicesList = [];
+        let cachedProcesses = [];
+        let selectedProcessName = null;
+        let currentSortField = 'cpu_pct';
+        let currentSortAsc = false;
+        let refreshTimer = null;
+
+        function init() {
+            fetchDevices();
+
+            // Setup Server-Sent Events (SSE) for live notification of process updates
+            if (window.EventSource) {
+                const sse = new EventSource('/api/events');
+                sse.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data.type === 'processes_updated' && data.device_id === currentDeviceId) {
+                            fetchProcessSnapshot();
+                        }
+                    } catch (e) {}
+                };
+            }
+
+            setupRefreshTimer();
+        }
+
+        function setupRefreshTimer() {
+            if (refreshTimer) clearInterval(refreshTimer);
+            const intervalSec = parseFloat(document.getElementById('refresh-interval').value) || 1;
+            refreshTimer = setInterval(fetchProcessSnapshot, intervalSec * 1000);
+        }
+
+        function onIntervalChange() {
+            setupRefreshTimer();
+        }
+
+        async function fetchDevices() {
+            try {
+                const res = await fetch('/api/devices');
+                const devices = await res.json();
+                cachedDevicesList = devices || [];
+                const select = document.getElementById('device-select');
+                if (!devices || devices.length === 0) {
+                    select.innerHTML = '<option value="">No devices registered</option>';
+                    return;
+                }
+                select.innerHTML = devices.map(d => `
+                    <option value="${d.device_id}" ${d.device_id === currentDeviceId ? 'selected' : ''}>
+                        ${escapeHtml(d.hostname)} (${escapeHtml(d.ip_address || 'No IP')}) [${d.status.toUpperCase()}]
+                    </option>
+                `).join('');
+
+                if (!currentDeviceId && devices.length > 0) {
+                    currentDeviceId = devices[0].device_id;
+                    select.value = currentDeviceId;
+                }
+                updateDeviceSourceDisplay();
+                fetchProcessSnapshot();
+            } catch (err) {
+                console.error("Error loading devices", err);
+            }
+        }
+
+        function updateDeviceSourceDisplay() {
+            const dev = cachedDevicesList.find(d => d.device_id === currentDeviceId);
+            if (dev) {
+                document.getElementById('source-hostname').innerText = dev.hostname;
+                document.getElementById('source-ip').innerText = dev.ip_address || '127.0.0.1';
+                document.getElementById('source-id').innerText = `ID: ${dev.device_id}`;
+                document.getElementById('table-source-info').innerHTML = `Source: <b>${escapeHtml(dev.hostname)}</b> (${escapeHtml(dev.ip_address || 'No IP')})`;
+            }
+        }
+
+        function onDeviceChange() {
+            currentDeviceId = document.getElementById('device-select').value;
+            selectedProcessName = null;
+            document.getElementById('trend-chart-title').innerText = '📈 Selected Process Trend: Total Workload';
+            updateDeviceSourceDisplay();
+            fetchProcessSnapshot();
+        }
+
+        async function fetchProcessSnapshot() {
+            if (!currentDeviceId) return;
+            try {
+                const res = await fetch(`/api/processes/latest?device_id=${encodeURIComponent(currentDeviceId)}`);
+                const snap = await res.json();
+                renderSnapshot(snap);
+                fetchProcessHistory();
+            } catch (err) {
+                console.error("Error fetching process snapshot", err);
+            }
+        }
+
+        function renderSnapshot(snap) {
+            const stalePill = document.getElementById('stale-indicator');
+            if (snap.is_stale) {
+                stalePill.className = 'status-pill status-stale';
+                stalePill.innerText = 'STALE TELEMETRY';
+            } else {
+                stalePill.className = 'status-pill status-fresh';
+                stalePill.innerText = 'LIVE STREAMING';
+            }
+
+            document.getElementById('last-updated-text').innerText = snap.recorded_at ? `Updated: ${formatTime(snap.recorded_at)}` : 'No data';
+            document.getElementById('stat-proc-count').innerText = snap.total_processes || 0;
+            document.getElementById('stat-proc-cpu').innerText = `${snap.total_cpu_pct || 0.0}%`;
+            document.getElementById('stat-proc-ram').innerText = `${snap.total_ram_pct || 0.0}%`;
+            document.getElementById('stat-proc-ram-sub').innerText = `${snap.total_ram_used_gb || 0.0} GB Used`;
+
+            const processes = snap.processes || [];
+            cachedProcesses = processes;
+
+            if (processes.length > 0) {
+                const topCpu = processes[0];
+                document.getElementById('stat-top-consumer').innerText = escapeHtml(topCpu.name);
+                document.getElementById('stat-top-consumer-sub').innerText = `${topCpu.cpu_pct}% CPU • ${topCpu.mem_mb} MB`;
+            } else {
+                document.getElementById('stat-top-consumer').innerText = '--';
+                document.getElementById('stat-top-consumer-sub').innerText = '0.0% CPU';
+            }
+
+            renderTopLists(processes);
+            filterProcessTable();
+        }
+
+        function renderTopLists(processes) {
+            const topCpuContainer = document.getElementById('top-cpu-list');
+            const topMemContainer = document.getElementById('top-mem-list');
+
+            // Top 10 by CPU
+            const sortedByCpu = [...processes].sort((a, b) => b.cpu_pct - a.cpu_pct).slice(0, 10);
+            if (sortedByCpu.length === 0) {
+                topCpuContainer.innerHTML = `<p style="font-size:0.75rem; color:var(--text-muted); padding:0.5rem; text-align:center;">No CPU metrics recorded.</p>`;
+            } else {
+                topCpuContainer.innerHTML = sortedByCpu.map(p => `
+                    <div class="top-item" onclick="selectProcessTrend('${escapeHtml(p.name)}')">
+                        <div class="top-item-title">
+                            <span class="proc-name-truncate" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</span>
+                            <span class="pid-badge">PID ${p.pid}</span>
+                        </div>
+                        <div style="font-weight:700; color:var(--status-rose); white-space:nowrap; flex-shrink:0;">
+                            ${p.cpu_pct}%
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Top 10 by RAM
+            const sortedByMem = [...processes].sort((a, b) => b.mem_mb - a.mem_mb).slice(0, 10);
+            if (sortedByMem.length === 0) {
+                topMemContainer.innerHTML = `<p style="font-size:0.75rem; color:var(--text-muted); padding:0.5rem; text-align:center;">No memory metrics recorded.</p>`;
+            } else {
+                topMemContainer.innerHTML = sortedByMem.map(p => `
+                    <div class="top-item" onclick="selectProcessTrend('${escapeHtml(p.name)}')">
+                        <div class="top-item-title">
+                            <span class="proc-name-truncate" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</span>
+                            <span class="pid-badge">PID ${p.pid}</span>
+                        </div>
+                        <div style="font-weight:700; color:var(--primary-blue); white-space:nowrap; flex-shrink:0;">
+                            ${p.mem_mb} MB <span style="font-size:0.7rem; color:var(--text-muted);">(${p.mem_pct}%)</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function filterProcessTable() {
+            const query = (document.getElementById('proc-search').value || '').toLowerCase();
+            let filtered = cachedProcesses.filter(p => 
+                (p.name || '').toLowerCase().includes(query) ||
+                String(p.pid).includes(query) ||
+                (p.status || '').toLowerCase().includes(query)
+            );
+
+            // Sort
+            filtered.sort((a, b) => {
+                let vA = a[currentSortField];
+                let vB = b[currentSortField];
+                if (typeof vA === 'string') {
+                    return currentSortAsc ? vA.localeCompare(vB) : vB.localeCompare(vA);
+                }
+                return currentSortAsc ? (vA - vB) : (vB - vA);
+            });
+
+            document.getElementById('process-table-count').innerText = `${filtered.length} processes`;
+            const tbody = document.getElementById('proc-tbody');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No matching processes found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(p => {
+                const cpuColor = p.cpu_pct > 50 ? 'var(--status-rose)' : (p.cpu_pct > 20 ? 'var(--status-amber)' : 'var(--status-green)');
+                const memColor = p.mem_pct > 25 ? 'var(--status-rose)' : (p.mem_pct > 10 ? 'var(--status-amber)' : 'var(--primary-blue)');
+
+                return `
+                    <tr onclick="selectProcessTrend('${escapeHtml(p.name)}')" style="cursor: pointer;">
+                        <td><b>${escapeHtml(p.name)}</b></td>
+                        <td><span class="pid-badge">${p.pid}</span></td>
+                        <td>
+                            <div class="meter-bar">
+                                <div class="meter-fill" style="width: ${Math.min(p.cpu_pct, 100)}%; background: ${cpuColor};"></div>
+                            </div>
+                            <b>${p.cpu_pct}%</b>
+                        </td>
+                        <td><b>${p.mem_mb} MB</b></td>
+                        <td>
+                            <div class="meter-bar">
+                                <div class="meter-fill" style="width: ${Math.min(p.mem_pct, 100)}%; background: ${memColor};"></div>
+                            </div>
+                            ${p.mem_pct}%
+                        </td>
+                        <td><span style="font-size:0.75rem; text-transform: capitalize;">${escapeHtml(p.status)}</span></td>
+                        <td style="font-size:0.72rem; color:var(--text-muted);">${escapeHtml(p.start_time || 'N/A')}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function sortTable(field) {
+            if (currentSortField === field) {
+                currentSortAsc = !currentSortAsc;
+            } else {
+                currentSortField = field;
+                currentSortAsc = (field === 'name' || field === 'status');
+            }
+            filterProcessTable();
+        }
+
+        function selectProcessTrend(procName) {
+            selectedProcessName = procName;
+            document.getElementById('trend-chart-title').innerHTML = `📈 Selected Process Trend: <b>${escapeHtml(procName)}</b>`;
+            fetchProcessHistory();
+        }
+
+        function resetProcessFilter() {
+            selectedProcessName = null;
+            document.getElementById('trend-chart-title').innerText = '📈 Selected Process Trend: Total Workload';
+            fetchProcessHistory();
+        }
+
+        async function fetchProcessHistory() {
+            if (!currentDeviceId) return;
+            try {
+                let url = `/api/processes/history?device_id=${encodeURIComponent(currentDeviceId)}&limit=40`;
+                if (selectedProcessName) {
+                    url += `&name=${encodeURIComponent(selectedProcessName)}`;
+                }
+                const res = await fetch(url);
+                const history = await res.json();
+                renderSvgHistoryChart(history);
+            } catch (err) {
+                console.error("Error fetching process history", err);
+            }
+        }
+
+        function renderSvgHistoryChart(history) {
+            const svg = document.getElementById('proc-history-svg');
+            const width = svg.clientWidth || 500;
+            const height = svg.clientHeight || 140;
+            const padding = 15;
+
+            if (!history || history.length < 2) {
+                svg.innerHTML = `<text x="50%" y="50%" fill="#94a3b8" font-size="11" text-anchor="middle">Gathering live process workload trend...</text>`;
+                return;
+            }
+
+            const stepX = (width - padding * 2) / (history.length - 1);
+            let cpuPoints = [];
+            let memPoints = [];
+
+            // Max value calculation for auto-scaling
+            const maxCpu = Math.max(...history.map(h => h.cpu_pct || 0), 20.0);
+            const maxMem = Math.max(...history.map(h => h.mem_mb || 0), 100.0);
+
+            history.forEach((pt, i) => {
+                const x = padding + (i * stepX);
+                const yCpu = height - padding - (((pt.cpu_pct || 0) / maxCpu) * (height - padding * 2));
+                const yMem = height - padding - (((pt.mem_mb || 0) / maxMem) * (height - padding * 2));
+                cpuPoints.push(`${x},${yCpu}`);
+                memPoints.push(`${x},${yMem}`);
+            });
+
+            svg.innerHTML = `
+                <!-- Grid Lines -->
+                <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#e2e8f0" stroke-width="1" />
+                <line x1="${padding}" y1="${height/2}" x2="${width - padding}" y2="${height/2}" stroke="#f1f5f9" stroke-dasharray="4" stroke-width="1" />
+                <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="#e2e8f0" stroke-width="1" />
+
+                <!-- Memory Line (Blue) -->
+                <polyline fill="none" stroke="#2563eb" stroke-width="2.5" points="${memPoints.join(' ')}" />
+
+                <!-- CPU Line (Amber/Red) -->
+                <polyline fill="none" stroke="#ef4444" stroke-width="2.5" points="${cpuPoints.join(' ')}" />
+
+                <!-- Legend -->
+                <rect x="${width - 150}" y="4" width="8" height="8" rx="2" fill="#ef4444" />
+                <text x="${width - 138}" y="12" fill="#64748b" font-size="9" font-weight="600">CPU (Peak ${maxCpu.toFixed(1)}%)</text>
+                <rect x="${width - 65}" y="4" width="8" height="8" rx="2" fill="#2563eb" />
+                <text x="${width - 53}" y="12" fill="#64748b" font-size="9" font-weight="600">RAM (MB)</text>
+            `;
+        }
+
+        function exportCSV() {
+            if (!currentDeviceId) return;
+            let url = `/api/processes/export?device_id=${encodeURIComponent(currentDeviceId)}`;
+            if (selectedProcessName) {
+                url += `&name=${encodeURIComponent(selectedProcessName)}`;
+            }
+            window.location.href = url;
+        }
+
+        function formatTime(isoStr) {
+            if (!isoStr) return 'Never';
+            try {
+                const d = new Date(isoStr);
+                return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            } catch (e) {
+                return isoStr;
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
